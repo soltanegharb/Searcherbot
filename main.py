@@ -10,8 +10,12 @@ BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 
 def load_courses():
-    with open('courses.pkl', 'rb') as f:
-        return pickle.load(f)
+    try:
+        with open('courses.pkl', 'rb') as f:
+            return pickle.load(f)
+    except Exception as e:
+        print(f"Error loading courses: {e}")
+        return {}
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -20,6 +24,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 def search_courses(keyword):
     courses = load_courses()
+    # Ensure keyword and course names are lowercase for case-insensitive matching
     results = {course: link for course,
                link in courses.items() if keyword.lower() in course.lower()}
     return results
