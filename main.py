@@ -43,10 +43,10 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     results = search_courses(keyword)
     if results:
         response = "\n\n".join(
-            [f"**{course}**: [{link}]({link})" for course, link in results.items()])
+            [f"{course}: [{link}]({link})" for course, link in results.items()])
         await update.message.reply_text(
-            f'**Found the following courses for "{
-                keyword}":** ˙✧˖°🎓 ༘⋆｡ ˚\n\n{response}',
+            f'Found the following courses for "{
+                keyword}": ˙✧˖°🎓 ༘⋆｡ ˚\n\n{response}',
             parse_mode='MarkdownV2'
         )
     else:
