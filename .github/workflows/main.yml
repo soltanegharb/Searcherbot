@@ -24,18 +24,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m venv venv
-        source venv/bin/activate
+        . venv/bin/activate
         pip install -r requirements.txt
-
-    - name: Run tests
-      run: |
-        source venv/bin/activate
-        # Add your tests here
-        python -m unittest discover
 
     - name: Deploy Bot
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       run: |
-        source venv/bin/activate
-        nohup python main.py &
+        . venv/bin/activate
+        python main.py
