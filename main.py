@@ -27,6 +27,7 @@ def search_courses(keyword):
     # Ensure keyword and course names are lowercase for case-insensitive matching
     results = {course: link for course,
                link in courses.items() if keyword.lower() in course.lower()}
+    print(f"Search results for '{keyword}': {results}")
     return results
 
 
