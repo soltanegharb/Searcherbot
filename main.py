@@ -21,7 +21,8 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyword = update.message.text
     results = search_courses(courses, keyword)
     if results:
-        response = "\n".join([link for course, link in results.items()])
+        response = "\n".join(
+            [f"{course}: {link}" for course, link in results.items()])
         await update.message.reply_text(
             f'دوره‌های پیدا شده برای "{keyword}":\n{response}'
         )
