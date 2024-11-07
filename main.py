@@ -3,10 +3,10 @@ import pickle
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# بارگذاری توکن از محیط
+# Load the bot token from the environment variable
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
-# بارگذاری دیکشنری از فایل
+# Load the dictionary from the file
 
 
 def load_courses():
@@ -15,7 +15,7 @@ def load_courses():
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Hello Tell Me What Course You Want')
+    await update.message.reply_text('Hello! Please send me a keyword to search for courses.')
 
 
 def search_courses(keyword):
@@ -37,7 +37,7 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             parse_mode='MarkdownV2'
         )
     else:
-        await update.message.reply_text(f'No Course Was Found For "{keyword}".')
+        await update.message.reply_text(f'No courses found for "{keyword}".')
 
 
 def main():
