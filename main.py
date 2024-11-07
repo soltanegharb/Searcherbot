@@ -1,10 +1,9 @@
-# main.py
 import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from courses import courses
 
-# Define the search function
+# تعریف تابع جستجو
 
 
 def search_courses(dictionary, keyword):
@@ -15,32 +14,31 @@ def search_courses(dictionary, keyword):
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Hello! Please send me a keyword to search for courses.')
+    await update.message.reply_text('سلام! لطفاً یک کلمه کلیدی بفرستید تا دوره‌های مربوطه را جستجو کنم.')
 
 
 async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     keyword = update.message.text
     results = search_courses(courses, keyword)
     if results:
-        response = "\n".join(
-            [f"**{course}**: [{link}]({link})" for course, link in results])
+        response = "\n".join([link for course, link in results.items()])
         await update.message.reply_text(
-            f'**Found the following courses for "{keyword}":**\n{response}',
+            f'دوره‌های پیدا شده برای "{keyword}":\n{response}',
             parse_mode='MarkdownV2'
         )
     else:
-        await update.message.reply_text(f'No courses found for "{keyword}".')
+        await update.message.reply_text(f'هیچ دوره‌ای برای "{keyword}" پیدا نشد.')
 
 
 def main():
-    # Load your bot token from environment variables
+    # بارگذاری توکن بات از متغیرهای محیطی
     BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
     app = ApplicationBuilder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
 
-    print("Starting the bot...")
+    print("بات در حال اجراست...")
     app.run_polling()
 
 
