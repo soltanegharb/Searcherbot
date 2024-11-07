@@ -13,16 +13,28 @@ def search_courses(dictionary, keyword):
                if keyword in key.lower()}
     return results
 
+# Function to log user information
+
+
+def log_user_info(user):
+    with open("user_logs.txt", "a") as f:
+        f.write(f"User ID: {user.id}, Username: {user.username}, First Name: {
+                user.first_name}, Last Name: {user.last_name}\n")
+
 # Start command handler
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.message.from_user
+    log_user_info(user)
     await update.message.reply_text('Hello! Please send me a keyword to search for courses.')
 
 # Search message handler (renamed to search_message)
 
 
 async def search_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.message.from_user
+    log_user_info(user)
     keyword = update.message.text
     results = search_courses(courses, keyword)
     if results:
@@ -39,6 +51,8 @@ async def search_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.inline_query.query
+    user = update.inline_query.from_user
+    log_user_info(user)
     if not query:
         return
 
@@ -55,6 +69,8 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.message.from_user
+    log_user_info(user)
     keyword = ' '.join(context.args)
     results = search_courses(courses, keyword)
     if results:
