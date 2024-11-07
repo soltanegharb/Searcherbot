@@ -1,6 +1,3 @@
-import pickle
-
-# دیکشنری که می‌خواهید ذخیره کنید
 courses = {
     "Data Manipulation in Python - Master Python, NumPy, and Pandas": "https://t.me/Course_Number_1/961",
     "Data Science On Your First Day with Python": "https://t.me/Course_Number_1/959",
@@ -262,11 +259,4 @@ courses = {
     "C# Object-Oriented Programming for Beginners in C# and .NET": "https://t.me/Course_Number_1/10516",
     "Start Your Own Woodworking Business Today! _ udemy": "https://t.me/Course_Number_1/10629",
 
-
-
 }
-
-
-# ذخیره دیکشنری در یک فایل
-with open('courses.pkl', 'wb') as f:
-    pickle.dump(courses, f)
