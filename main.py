@@ -1,65 +1,97 @@
-import os
+import sqlite3
 import pickle
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-
-# Load the bot token from the environment variable
-BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 # Load the dictionary from the file
 
 
 def load_courses():
+    with open('courses.pkl', 'rb') as f:
+        return pickle.load(f)
+
+# Create a SQLite database connection
+
+
+def create_connection(db_file):
+    conn = None
     try:
-        with open('courses.pkl', 'rb') as f:
-            courses = pickle.load(f)
-            print(f"Courses loaded: {courses}")
-            return courses
-    except Exception as e:
-        print(f"Error loading courses: {e}")
-        return {}
+        conn = sqlite3.connect(db_file)
+        return conn
+    except sqlite3.Error as e:
+        print(e)
+    return conn
+
+# Create a table for the courses
 
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Hello! Please send me a keyword to search for courses.')
+def create_table(conn):
+    try:
+        sql_create_courses_table = """CREATE TABLE IF NOT EXISTS courses (
+                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        name TEXT NOT NULL,
+                                        link TEXT NOT NULL
+                                    );"""
+        cursor = conn.cursor()
+        cursor.execute(sql_create_courses_table)
+    except sqlite3.Error as e:
+        print(e)
+
+# Insert data into the table
 
 
-def search_courses(keyword):
-    courses = load_courses()
-    keyword = keyword.lower()
-    print(f"Searching for keyword: {keyword}")
-    results = {}
-    # Iterate through each key in the dictionary
+def insert_courses(conn, courses):
+    sql_insert_course = """INSERT INTO courses (name, link) VALUES (?, ?)"""
+    cursor = conn.cursor()
     for course, link in courses.items():
-        temp = str(course).lower()
-        if keyword in temp:
-            results[course] = link
-    print(f"Search results: {results}")
-    return results
-
-
-async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    keyword = update.message.text
-    results = search_courses(keyword)
-    if results:
-        response = "\n\n".join(
-            [f"{course}: [{link}]({link})" for course, link in results.items()])
-        await update.message.reply_text(
-            f'Found the following courses for "{
-                keyword}": ˙✧˖°🎓 ༘⋆｡ ˚\n\n{response}',
-            parse_mode='MarkdownV2'
-        )
-    else:
-        await update.message.reply_text(f'No courses found for "{keyword}".')
+        cursor.execute(sql_insert_course, (course, link))
+    conn.commit()
 
 
 def main():
-    print("Starting the bot")
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
-    app.run_polling()
+    database = "courses.db"
+
+    # Load courses dictionary
+    courses = load_courses()
+
+    # Create a database connection
+    conn = create_connection(database)
+
+    # Create table and insert data
+    if conn:
+        create_table(conn)
+        insert_courses(conn, courses)
+        conn.close()
+        print("Courses have been successfully inserted into the database.")
 
 
 if __name__ == '__main__':
     main()
+
+
+def create_connection(db_file):
+    conn = sqlite3.connect(db_file)
+    return conn
+
+
+def search_courses(conn, keyword):
+    keyword = f"%{keyword.lower()}%"
+    sql_search = """SELECT name, link FROM courses WHERE LOWER(name) LIKE ?"""
+    cursor = conn.cursor()
+    cursor.execute(sql_search, (keyword,))
+    return cursor.fetchall()
+
+
+def search_keyword(keyword):
+    database = "courses.db"
+    conn = create_connection(database)
+    results = search_courses(conn, keyword)
+    conn.close()
+    if results:
+        response = "\n\n".join(
+            [f"**{name}**: [{link}]({link})" for name, link in results])
+        return f'**Found the following courses for "{keyword}":**\n\n{response}'
+    else:
+        return f'No courses found for "{keyword}".'
+
+
+# Example usage:
+print(search_keyword("python"))
