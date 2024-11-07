@@ -31,7 +31,8 @@ def search_courses(keyword):
     results = {}
     # Iterate through each key in the dictionary
     for course, link in courses.items():
-        if keyword in course.lower():
+        temp = str(course).lower()
+        if keyword in temp:
             results[course] = link
     print(f"Search results: {results}")
     return results
@@ -44,8 +45,8 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         response = "\n\n".join(
             [f"**{course}**: [{link}]({link})" for course, link in results.items()])
         await update.message.reply_text(
-            f'Found the following courses for "{
-                keyword}":\n ˙✧˖°🎓 ༘⋆｡ ˚\n\n{response}',
+            f'**Found the following courses for "{
+                keyword}":** ˙✧˖°🎓 ༘⋆｡ ˚\n\n{response}',
             parse_mode='MarkdownV2'
         )
     else:
