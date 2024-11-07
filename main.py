@@ -6,9 +6,9 @@ from courses import courses
 # تعریف تابع جستجو
 
 
-def search_courses(dictionary, keyword):
+def search_courses(courses, keyword):
     keyword = keyword.lower()
-    results = {key: value for key, value in dictionary.items()
+    results = {key: value for key, value in courses.items()
                if keyword in key.lower()}
     return results
 
