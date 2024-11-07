@@ -1,75 +1,18 @@
+import os
 import sqlite3
-import pickle
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-# Load the dictionary from the file
-
-
-def load_courses():
-    with open('courses.pkl', 'rb') as f:
-        return pickle.load(f)
+# Load the bot token from the environment variable
+BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 
 # Create a SQLite database connection
 
 
 def create_connection(db_file):
-    conn = None
-    try:
-        conn = sqlite3.connect(db_file)
-        return conn
-    except sqlite3.Error as e:
-        print(e)
-    return conn
+    return sqlite3.connect(db_file)
 
-# Create a table for the courses
-
-
-def create_table(conn):
-    try:
-        sql_create_courses_table = """CREATE TABLE IF NOT EXISTS courses (
-                                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                        name TEXT NOT NULL,
-                                        link TEXT NOT NULL
-                                    );"""
-        cursor = conn.cursor()
-        cursor.execute(sql_create_courses_table)
-    except sqlite3.Error as e:
-        print(e)
-
-# Insert data into the table
-
-
-def insert_courses(conn, courses):
-    sql_insert_course = """INSERT INTO courses (name, link) VALUES (?, ?)"""
-    cursor = conn.cursor()
-    for course, link in courses.items():
-        cursor.execute(sql_insert_course, (course, link))
-    conn.commit()
-
-
-def main():
-    database = "courses.db"
-
-    # Load courses dictionary
-    courses = load_courses()
-
-    # Create a database connection
-    conn = create_connection(database)
-
-    # Create table and insert data
-    if conn:
-        create_table(conn)
-        insert_courses(conn, courses)
-        conn.close()
-        print("Courses have been successfully inserted into the database.")
-
-
-if __name__ == '__main__':
-    main()
-
-
-def create_connection(db_file):
-    conn = sqlite3.connect(db_file)
-    return conn
+# Search courses in the database
 
 
 def search_courses(conn, keyword):
@@ -80,18 +23,33 @@ def search_courses(conn, keyword):
     return cursor.fetchall()
 
 
-def search_keyword(keyword):
-    database = "courses.db"
-    conn = create_connection(database)
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text('Hello! Please send me a keyword to search for courses.')
+
+
+async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    keyword = update.message.text
+    conn = create_connection("courses.db")
     results = search_courses(conn, keyword)
     conn.close()
     if results:
         response = "\n\n".join(
             [f"**{name}**: [{link}]({link})" for name, link in results])
-        return f'**Found the following courses for "{keyword}":**\n\n{response}'
+        await update.message.reply_text(
+            f'**Found the following courses for "{keyword}":** \n\n{response}',
+            parse_mode='MarkdownV2'
+        )
     else:
-        return f'No courses found for "{keyword}".'
+        await update.message.reply_text(f'No courses found for "{keyword}".')
 
 
-# Example usage:
-print(search_keyword("python"))
+def main():
+    print("Starting the bot")
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
+    app.run_polling()
+
+
+if __name__ == '__main__':
+    main()
