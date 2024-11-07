@@ -6,9 +6,9 @@ from courses import courses
 # تعریف تابع جستجو
 
 
-def search_courses(courses, keyword):
+def search_courses(dictionary, keyword):
     keyword = keyword.lower()
-    results = {key: value for key, value in courses.items()
+    results = {key: value for key, value in dictionary.items()
                if keyword in key.lower()}
     return results
 
@@ -22,6 +22,9 @@ async def search(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     results = search_courses(courses, keyword)
     if results:
         response = "\n".join([link for course, link in results.items()])
+        await update.message.reply_text(
+            f'دوره‌های پیدا شده برای "{keyword}":\n{response}'
+        )
     else:
         await update.message.reply_text(f'هیچ دوره‌ای برای "{keyword}" پیدا نشد.')
 
