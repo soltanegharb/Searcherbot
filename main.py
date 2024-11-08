@@ -40,9 +40,7 @@ async def search_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if results:
         response = "\n\n".join(
             [f"{course}: {link}" for course, link in results.items()])
-        await update.message.reply_text(
-            f'Found the following courses for "{keyword}":\n\n{response}'
-        )
+        await update.message.reply_text(f'Found the following courses for "{keyword}":\n\n{response}')
     else:
         await update.message.reply_text(f'No courses found for "{keyword}".')
 
@@ -76,9 +74,7 @@ async def search_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if results:
         response = "\n\n".join(
             [f"{course}: {link}" for course, link in results.items()])
-        await update.message.reply_text(
-            f'Found the following courses for "{keyword}":\n\n{response}'
-        )
+        await update.message.reply_text(f'Found the following courses for "{keyword}":\n\n{response}')
     else:
         await update.message.reply_text(f'No courses found for "{keyword}".')
 
